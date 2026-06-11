@@ -11,4 +11,3 @@ fn main() {
     authenticate(cred);
     println!("Hello, world!");
 }
- 

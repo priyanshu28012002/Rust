@@ -15,7 +15,6 @@ fn main() {
 
     // fn add(self, s: &str) -> String {
 
-
     let mut s1 = String::from("Hello ");
 
     let mut s2 = String::from("Word !");

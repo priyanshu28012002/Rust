@@ -1,47 +1,42 @@
-use std::sync::{
-    atomic::{AtomicBool, Ordering},
-    Arc,
-};
-use std::{thread, time::Duration};
-
+use std::thread;
+use std::time::Duration;
 fn main() {
-    let running = Arc::new(AtomicBool::new(true));
+    closuresWithThreads();
+}
 
-    // Ctrl+C handler
-    {
-        let r = running.clone();
-        ctrlc::set_handler(move || {
-            println!("Ctrl+C received");
-            r.store(false, Ordering::SeqCst);
-        }).expect("Error setting Ctrl-C handler");
+// Closures with Threads
+fn closuresWithThreads() {
+    let v = vec![1, 2, 3];
+    let handle = thread::spawn(move|| {
+        println!("Here's a vector: {v:?}");
+    });
+    drop(v);
+    handle.join().unwrap();
+}
+
+fn Spwan_thread_wait_to_finish() {
+    let handle = thread::spawn(|| {
+        for i in 1..10 {
+            println!("Hi number {i} from the spawned thread!");
+            thread::sleep(Duration::from_millis(1));
+        }
+    });
+    for i in 1..5 {
+        println!("hi number {i} from the main thread!");
+        thread::sleep(Duration::from_secs(1));
     }
+    handle.join().unwrap();
+}
 
-    let num_threads = 4; // change this to N
-    let mut handles = Vec::new();
-
-    for i in 0..num_threads {
-        let r = running.clone();
-
-        let handle = thread::spawn(move || {
-            while r.load(Ordering::SeqCst) {
-                println!("Worker {} running...", i);
-                thread::sleep(Duration::from_millis(500));
-            }
-            println!("Worker {} stopping...", i);
-        });
-
-        handles.push(handle);
+fn Spwan_thread() {
+    thread::spawn(|| {
+        for i in 1..10 {
+            println!("hi number {i} from the spawned thread!");
+            thread::sleep(Duration::from_millis(1));
+        }
+    });
+    for i in 1..5 {
+        println!("hi number {i} from the main thread!");
+        thread::sleep(Duration::from_millis(1));
     }
-
-    // Main loop
-    while running.load(Ordering::SeqCst) {
-        thread::sleep(Duration::from_millis(200));
-    }
-
-    // Join ALL threads (important)
-    for handle in handles {
-        handle.join().unwrap();
-    }
-
-    println!("All workers stopped. Clean exit.");
 }
